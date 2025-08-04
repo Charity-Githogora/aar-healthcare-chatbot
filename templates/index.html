@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AARMEDBOT</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+        }
+
+       
+        video#background-video {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+        }
+
+        
+        .menu-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            cursor: pointer;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .menu-line {
+            width: 30px;
+            height: 3px;
+            background: black;
+            margin: 6px 0;
+            transition: all 0.3s;
+        }
+        .menu-btn:hover .menu-line {
+            background: maroon;
+        }
+
+        
+        .dropdown {
+            position: fixed;
+            top: 0;
+            left: -25%; 
+            width: 25%; 
+            height: 100vh;
+            background: rgb(175, 171, 171);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+            z-index: 99;
+            transition: left 0.3s ease;
+            padding-top: 80px; 
+        }
+        .dropdown a {
+            display: block;
+            padding: 15px 20px;
+            color: white;
+            text-decoration: none;
+            font-size: 1.1em;
+            transition: all 0.3s;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .dropdown a:hover {
+            color: black;
+            background: rgba(0, 0, 0, 0.1);
+        }
+        .show {
+            left: 0; 
+        }
+
+        
+        .button-container {
+            position: absolute;
+            bottom: 5%; 
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+        }
+        
+        .button {
+            background-color: #ece5e5; 
+            color: maroon; 
+            padding: 20px 50px;
+            font-size: 1.5em;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .button:hover {
+            background-color: #1a1a1a; 
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.5);
+        }
+    </style>
+</head>
+<body>
+        <video id="background-video" autoplay loop muted playsinline>
+        <source src="/static/home.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+>
+    <div class="menu-btn" id="menuBtn">
+        <div class="menu-line"></div>
+        <div class="menu-line"></div>
+        <div class="menu-line"></div>
+    </div>
+
+   
+    <div class="dropdown" id="dropdownMenu">
+        <a href="https://www.aar-healthcare.com/" target="_blank">AAR Hospital</a>
+        <a href="https://aar-insurance.com/" target="_blank">AAR Insurance</a>
+        <a href="https://www.aar-healthcare.com/rescue-services/" target="_blank">AAR Rescue</a>
+        <a href="https://www.aar-healthcare.com/dial-a-doc/" target="_blank">Dial a Doc</a>
+        <a href="https://www.aar-healthcare.com/dial-a-dawa/" target="_blank">Dial a Dawa</a>
+    </div>
+
+    
+    <div class="button-container">
+        <button id="startChat" class="button">Start Chat</button>
+    </div>
+
+    <script>
+        
+        document.getElementById("menuBtn").addEventListener("click", function() {
+            document.getElementById("dropdownMenu").classList.toggle("show");
+        });
+
+        
+        window.addEventListener("click", function(event) {
+            if (!event.target.matches('.menu-btn') && !event.target.matches('.menu-line') && 
+                !event.target.matches('.dropdown') && !event.target.matches('.dropdown a')) {
+                var dropdown = document.getElementById("dropdownMenu");
+                if (dropdown.classList.contains('show')) {
+                    dropdown.classList.remove('show');
+                }
+            }
+        });
+
+        
+        document.getElementById("startChat").addEventListener("click", function() {
+            window.location.href = "/chat";
+        });
+    </script>
+</body>
+</html>

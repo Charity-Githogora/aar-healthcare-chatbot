@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AARMEDBOT - Medical Assistant</title>
+    <style>
+        body, html {
+          margin: 0;
+          padding: 0;
+          height: 100%;
+          font-family: Arial, sans-serif;
+        }
+        
+        .background-video {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          z-index: -1;
+        }
+
+        body {
+          font-family: Arial, sans-serif;
+          margin: 0;
+          padding: 0;
+          background-color: #f5f5f5;
+          height: 100vh;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .chat-container {
+          width: 95%;
+          max-width: 800px;
+          margin: 10px auto;
+          background: rgba(255, 255, 255, 0.85);
+          border-radius: 10px;
+          box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+          padding: 15px;
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          max-height: calc(100vh - 40px);
+          position: relative;
+          z-index: 1;
+        }
+
+        .chat-header {
+          text-align: center;
+          color: maroon;
+          margin: 5px 0 10px;
+          flex-shrink: 0;
+        }
+
+        .chat-messages {
+          flex: 1;
+          overflow-y: auto;
+          border: 1px solid #ddd;
+          padding: 8px;
+          margin-bottom: 8px;
+          border-radius: 5px;
+          min-height: 60vh;
+          max-height: 65vh;
+          background: rgba(255, 255, 255, 0.7);
+        }
+
+        .message {
+          margin-bottom: 8px;
+          padding: 6px 10px;
+          border-radius: 5px;
+          max-width: 80%;
+          word-wrap: break-word;
+          line-height: 1.4;
+        }
+
+        .user-message {
+          background-color: #e6f7ff;
+          margin-left: auto;
+          text-align: right;
+        }
+
+        .bot-message {
+          background-color: #f0f0f0;
+          margin-right: auto;
+          text-align: left;
+        }
+
+        .input-area {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-shrink: 0;
+          padding-top: 8px;
+        }
+
+        #user-input {
+          flex: 1;
+          padding: 8px 10px;
+          border: 1px solid #ddd;
+          border-radius: 5px;
+          font-size: 0.95em;
+          min-height: 40px;
+        }
+
+        button {
+          background-color: maroon;
+          color: white;
+          border: none;
+          padding: 8px 12px;
+          border-radius: 5px;
+          cursor: pointer;
+          font-size: 0.95em;
+          transition: background-color 0.3s;
+          height: 40px;
+          white-space: nowrap;
+        }
+
+        button:hover {
+          background-color: #800000;
+        }
+
+        .back-button {
+          display: block;
+          text-align: center;
+          margin-top: 8px;
+          color: maroon;
+          text-decoration: none;
+          font-size: 0.9em;
+        }
+
+        .pulse {
+          animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+          0% { background-color: maroon; }
+          50% { background-color: #ff4444; }
+          100% { background-color: maroon; }
+        }
+
+        .disclaimer {
+          font-size: 0.75em;
+          text-align: center;
+          margin: 5px 0 0;
+          color: #666;
+        }
+
+        
+        #location-btn {
+          position: fixed;
+          bottom: 20px;
+          right: 60px;
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+          z-index: 100;
+          padding: 0;
+        }
+
+        
+        #appointment-btn {
+          position: fixed;
+          bottom: 20px;
+          right: 15px;
+          border-radius: 50%;
+          width: 40px;
+          height: 40px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+          z-index: 100;
+          padding: 0;
+          font-size: 1em;
+        }
+
+        
+        .modal {
+          display: none;
+          position: fixed;
+          z-index: 200;
+          left: 0;
+          top: 0;
+          width: 100%;
+          height: 100%;
+          background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+          background-color: white;
+          margin: 10% auto;
+          padding: 20px;
+          border-radius: 10px;
+          width: 80%;
+          max-width: 500px;
+        }
+
+        .modal-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 15px;
+        }
+
+        .close-btn {
+          color: #aaa;
+          font-size: 28px;
+          font-weight: bold;
+          cursor: pointer;
+        }
+
+        .close-btn:hover {
+          color: black;
+        }
+
+        .location-list {
+          list-style-type: none;
+          padding: 0;
+          margin: 0;
+        }
+
+        .location-list li {
+          padding: 10px;
+          border-bottom: 1px solid #eee;
+          cursor: pointer;
+        }
+
+        .location-list li:hover {
+          background-color: #f5f5f5;
+        }
+
+        
+        @media (max-width: 600px) {
+          .chat-container {
+            width: 100%;
+            border-radius: 0;
+            padding: 10px;
+            max-height: 100vh;
+          }
+          .chat-messages {
+            min-height: 55vh;
+            max-height: 60vh;
+          }
+          .message {
+            max-width: 90%;
+          }
+          #location-btn {
+            bottom: 20px;
+            right: 70px;
+          }
+          #appointment-btn {
+            bottom: 20px;
+            right: 20px;
+          }
+        }
+    </style>
+</head>
+
+<body>
+    
+    <video autoplay muted loop class="background-video">
+        <source src="{{ url_for('static', filename='chat.mp4') }}" type="video/mp4">
+        Your browser does not support HTML5 video.
+    </video>
+
+    <div class="chat-container">
+        <div class="chat-header">
+            <h1>AAR MEDBOT <span>💊</span></h1>
+            <p>Your AAR AI-powered medical assistant</p>
+        </div>
+        <div class="chat-messages" id="chat-messages"></div>
+        <div class="input-area">
+            <input type="text" id="user-input" placeholder="Type your medical question here...">
+            <button id="voice-btn" class="voice-btn" title="Speak your question">🎙</button>
+            <button id="send-button">Send</button>
+        </div>
+        <button id="location-btn" title="Find AAR clinics near you">📍</button>
+        <button id="appointment-btn" title="Book an appointment" onclick="window.location.href='https://www.aar-healthcare.com/booking-form/'">🗓</button>
+        <div class="disclaimer">
+            <b>Medical Disclaimer: This chatbot provides general information and is not a substitute for professional medical advice. Please visit one of our many branches near you.</b>
+        </div>
+        <a href="/" class="back-button">← Back to Home</a>
+    </div>
+
+    
+    <div id="location-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>AAR Clinics Near You</h3>
+                <span class="close-btn">×</span>
+            </div>
+            <div id="location-status">Detecting your location...</div>
+            <ul class="location-list" id="nearby-clinics"></ul>
+        </div>
+    </div>
+
+    
+    <script>
+        const chatMessages = document.getElementById("chat-messages");
+        const userInput = document.getElementById("user-input");
+        const sendButton = document.getElementById("send-button");
+        const voiceButton = document.getElementById("voice-btn");
+        const locationButton = document.getElementById("location-btn");
+        const locationModal = document.getElementById("location-modal");
+        const closeBtn = document.querySelector(".close-btn");
+        const locationStatus = document.getElementById("location-status");
+        const nearbyClinics = document.getElementById("nearby-clinics");
+
+        let recognition = null;
+        let isListening = false;
+        let userLocation = null;
+
+        if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
+            recognition.onresult = function(event) {
+                const transcript = event.results[0][0].transcript;
+                userInput.value = transcript;
+                stopListening();
+            };
+            recognition.onerror = function(event) {
+                console.error('Speech recognition error', event.error);
+                stopListening();
+                addMessage("Sorry, I couldn't hear you. Please try again or type your question.", false);
+            };
+            recognition.onend = function() {
+                stopListening();
+            };
+        }
+
+        function startListening() {
+            if (recognition) {
+                recognition.start();
+                isListening = true;
+                voiceButton.classList.add('pulse');
+                addMessage("Listening... Speak now.", false);
+            } else {
+                addMessage("Sorry, your browser doesn't support speech recognition.", false);
+            }
+        }
+
+        function stopListening() {
+            if (recognition && isListening) {
+                recognition.stop();
+                isListening = false;
+                voiceButton.classList.remove('pulse');
+            }
+        }
+
+        locationButton.addEventListener('click', function() {
+            locationModal.style.display = "block";
+            getUserLocation();
+        });
+
+        closeBtn.addEventListener('click', function() {
+            locationModal.style.display = "none";
+        });
+
+        window.addEventListener('click', function(event) {
+            if (event.target === locationModal) {
+                locationModal.style.display = "none";
+            }
+        });
+
+        function getUserLocation() {
+            if (navigator.geolocation) {
+                locationStatus.textContent = "Detecting your location...";
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        userLocation = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude
+                        };
+                        fetchNearbyClinics(userLocation);
+                    },
+                    function(error) {
+                        console.error("Geolocation error:", error);
+                        locationStatus.textContent = "Unable to access your location.";
+                    }
+                );
+            } else {
+                locationStatus.textContent = "Geolocation is not supported.";
+            }
+        }
+
+        async function fetchNearbyClinics(location) {
+            try {
+                const response = await fetch("/find-clinics", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ location: location })
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                displayNearbyClinics(data.clinics);
+            } catch (error) {
+                console.error("Error fetching clinics:", error);
+                locationStatus.textContent = "Error finding nearby clinics.";
+            }
+        }
+
+        function displayNearbyClinics(clinics) {
+            if (!clinics || clinics.length === 0) {
+                locationStatus.textContent = "No clinics found nearby.";
+                nearbyClinics.innerHTML = "";
+                return;
+            }
+            locationStatus.textContent = `Found ${clinics.length} clinic(s) nearby:`;
+            nearbyClinics.innerHTML = "";
+            clinics.forEach(clinic => {
+                const li = document.createElement("li");
+                li.innerHTML = `<strong>${clinic.name}</strong><br>${clinic.address}<br>${clinic.distance.toFixed(1)} km away | <a href="https://maps.google.com/?q=${clinic.address}" target="_blank">Open in Maps</a>`;
+                li.addEventListener('click', function() {
+                    addMessage(`I'd like to visit the AAR clinic at ${clinic.address}`, true);
+                    addMessage(`Great choice! ${clinic.name} at ${clinic.address} is ${clinic.distance.toFixed(1)} km away.`, false);
+                    locationModal.style.display = "none";
+                });
+                nearbyClinics.appendChild(li);
+            });
+        }
+
+        voiceButton.addEventListener('click', function() {
+            if (isListening) {
+                stopListening();
+            } else {
+                startListening();
+            }
+        });
+
+        window.addEventListener('load', () => {
+            addMessage("Hello! I'm your AAR health assistant. How can I help you today?", false);
+        });
+
+        function addMessage(text, isUser) {
+            const messageDiv = document.createElement("div");
+            messageDiv.classList.add("message", isUser ? "user-message" : "bot-message");
+            messageDiv.textContent = text;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            if (!isUser && 'speechSynthesis' in window) {
+                const speech = new SpeechSynthesisUtterance(text);
+                window.speechSynthesis.speak(speech);
+            }
+        }
+
+        async function sendMessage() {
+            const message = userInput.value.trim();
+            if (message) {
+                addMessage(message, true);
+                userInput.value = "";
+                try {
+                    const typingDiv = document.createElement("div");
+                    typingDiv.classList.add("message", "bot-message");
+                    typingDiv.textContent = "Typing...";
+                    chatMessages.appendChild(typingDiv);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                    const response = await fetch("/chat", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ message: message })
+                    });
+                    chatMessages.removeChild(typingDiv);
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    const data = await response.json();
+                    addMessage(data.response, false);
+                } catch (error) {
+                    addMessage("Sorry, I encountered an error: " + error.message, false);
+                }
+            }
+        }
+
+        sendButton.addEventListener("click", sendMessage);
+        userInput.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") sendMessage();
+        });
+    </script>
+</body>
+</html>
